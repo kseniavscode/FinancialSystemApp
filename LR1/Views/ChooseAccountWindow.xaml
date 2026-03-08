@@ -1,0 +1,26 @@
+﻿<Window x:Class="LR1.Views.ChooseAccountWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LR1.Views"
+        mc:Ignorable="d"
+        Title="ChooseAccountWindow" Height="350" Width="300" WindowStartupLocation="CenterOwner">
+    <Grid x:Name="OpenDepositGrid">
+        <StackPanel Margin="20">
+            <TextBlock Text="Close a deposit" FontSize="18" Margin="20, 10" FontFamily="Artifakt Element" FontWeight="Bold"/>
+            <TextBlock Text="Select source account:" Margin="20,5"/>
+            <ComboBox x:Name="ChooseAccountComboBox" DisplayMemberPath="Number" Margin="20,5" Padding="5"/>
+        
+            <Button Content="Choose" 
+                    Click="CloseDepositButton_Click"
+                    FontSize="16"
+                    Background="DarkSeaGreen" 
+                    Foreground="White" 
+                    Margin="40,5"
+                    Padding="5"
+                    FontFamily="Arial Black"
+                    FontWeight="Bold"/>
+        </StackPanel>
+    </Grid>
+</Window>

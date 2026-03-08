@@ -12,11 +12,14 @@ namespace LR1.Models
         public int TermMonths { get; set; }
 
         public DateTime EndDate => StartDate.AddMinutes(TermMonths);
-        public DepositAccount(string number, Guid ownerId, Guid bankId, BankAccountType type, decimal procent, int termMonths) : base(number, ownerId, bankId, type)
+        public string NumberAccount {  get; set; }
+        public decimal CurrentInterest => CalculateCurrentInterest();
+        public DepositAccount(string number, string numberAccount, Guid ownerId, Guid bankId, BankAccountType type, decimal procent, int termMonths) : base(number, ownerId, bankId, type)
         {
             InterestRate = procent;
             StartDate = DateTime.Now;
             TermMonths = termMonths;
+            NumberAccount = numberAccount;
         }
         public DepositAccount() { }
 

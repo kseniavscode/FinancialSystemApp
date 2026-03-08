@@ -2,6 +2,7 @@
 using LR1.Views;
 using System.Security.Cryptography;
 using System.Text;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace LR1
 {
@@ -20,12 +22,23 @@ namespace LR1
     public partial class MainWindow : Window
     {
         private User _current;
+        private DispatcherTimer _timer;
         public MainWindow(User user)
         {
             InitializeComponent();
             _current = user;
             WelcomeTextBlock.Text = $"Welcome, {_current.Name}! Your role is {_current.Role}.";
+            _timer = new DispatcherTimer();
+            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
+
+            RefreshClientAccounts();
             SetupInterface();
+        }
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            ClientDepositsGrid.Items.Refresh();
         }
         private void RefreshClientAccounts()
         {
@@ -170,14 +183,48 @@ namespace LR1
             RefreshClientAccounts();    
         }
 
-        private void HistoryDeposit_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         private void TransferDeposit_Click(object sender, RoutedEventArgs e)
         {
+            var selectedDeposit = ClientDepositsGrid.SelectedItem as DepositAccount;
+            if (selectedDeposit == null)
+            {
+                MessageBox.Show("Please select a deposit to close!");
+                return;
+            }
 
+            if (DateTime.Now < selectedDeposit.EndDate)
+            {
+                var result = MessageBox.Show(
+                    $"The term is not over yet! If you close now, you will LOSE all interest.\n" +
+                    $"Expected end: {selectedDeposit.EndDate:HH:mm:ss}\n" +
+                    "Do you want to proceed?",
+                    "Early Closure",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.No) return;
+            }
+            decimal profit = selectedDeposit.CalculateCurrentInterest();
+            decimal finalAmount = selectedDeposit.Balance + profit;
+
+            var mainAccount = App.Database.Accounts.FirstOrDefault(a => a.OwnerId == _current.IdUser && a.Number == selectedDeposit.NumberAccount);
+            if (mainAccount == null)
+            {
+                MessageBox.Show("Main account not found! Cannot transfer funds. Choose another account");
+                ChooseAccountWindow chooseAccountWindow = new ChooseAccountWindow(_current);
+                chooseAccountWindow.Owner = this;
+                chooseAccountWindow.ShowDialog();
+                mainAccount = chooseAccountWindow.ChooseAccountComboBox.SelectedItem as BankAccount;
+            }
+            
+
+            mainAccount.Balance += finalAmount;
+            App.Database.Accounts.Remove(selectedDeposit);
+            App.Database.Save();
+
+            RefreshClientAccounts();
+            MessageBox.Show($"Deposit closed!\nTransferred to account {mainAccount.Number}: {finalAmount:C}\n(Profit: {profit:C})");
         }
 
         private void DepositeDeposite_Click(object sender, RoutedEventArgs e)
@@ -187,7 +234,10 @@ namespace LR1
 
         private void OpenDeposite_Click(object sender, RoutedEventArgs e)
         {
-
+            AddDepositWindow addDepositWindow = new AddDepositWindow(_current);
+            addDepositWindow.Owner = this;
+            addDepositWindow.ShowDialog();
+            RefreshClientAccounts();
         }
     }
 }
