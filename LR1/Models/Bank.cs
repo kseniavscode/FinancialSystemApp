@@ -6,14 +6,14 @@ namespace LR1.Models
 {
     public class Bank
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid BankId { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
 
         public Bank() { }
         public Bank(string name)
         {
             Name = name;
-            Id = Guid.NewGuid();
+            BankId = Guid.NewGuid();
         }
 
     }

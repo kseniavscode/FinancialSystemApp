@@ -12,6 +12,7 @@
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        
         <StackPanel Grid.Column="0" Margin="0,0,10,0">
             <TextBlock x:Name="WelcomeTextBlock" 
                        FontSize="16" 
@@ -119,7 +120,7 @@
                   Visibility="Collapsed">
             <DataGrid x:Name="ManagerGrid"
                       AutoGenerateColumns="False"
-                      CanUserAddRows="False" SelectionChanged="ManagerGrid_SelectionChanged">
+                      CanUserAddRows="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Login"
                                         Binding="{Binding Name}"
@@ -129,8 +130,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="ApprovedButton" Content="Approve" Background="DarkSlateGray" Click="Approve_Click"/>
-                                    <Button x:Name="RejectedButton" Content="Reject" Background="DarkRed" Click="Reject_Click"/>
+                                    <Button x:Name="ApprovedButton" Content="Approve" Background="Green" Click="Approve_Click" Margin="2"/>
+                                    <Button x:Name="RejectedButton" Content="Reject" Background="Red" Click="Reject_Click" Margin="2"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -155,7 +156,7 @@
                             <DataTemplate>
                                 <StackPanel Margin="5">
                                     <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding BIC}" Foreground="Gray"/>
+                                    <TextBlock Text="{Binding BankId}" Foreground="Gray"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -176,7 +177,7 @@
                                                     Binding="{Binding BankName}" 
                                                     Width="100"/>
                                 <DataGridTextColumn Header="Number of an account" 
-                                                    Binding="{Binding Number}" 
+                                                    Binding="{Binding BankAccountId}" 
                                                     Width="*"/>
                                 <DataGridTextColumn Header="Balance" 
                                                     Binding="{Binding Balance}" 
@@ -196,6 +197,10 @@
                                     Margin="5" 
                                     Padding="10,5" 
                                     Click="OpenAccount_Click"/>
+                            <Button Content="Deposite" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="DepositeAccount_Click"/>
                             <Button Content="Transfer" 
                                     Margin="5" 
                                     Padding="10,5" 

@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using LR1.Models;
+using LR1.Views;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,8 +11,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using LR1.Models;
-using LR1.Views;
 
 namespace LR1
 {
@@ -25,6 +26,11 @@ namespace LR1
             _current = user;
             WelcomeTextBlock.Text = $"Welcome, {_current.Name}! Your role is {_current.Role}.";
             SetupInterface();
+        }
+        private void RefreshClientAccounts()
+        {
+            ClientAccountsGrid.ItemsSource = null;
+            ClientAccountsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser).ToList(); ;
         }
         private void SetupInterface()
         {
@@ -47,10 +53,7 @@ namespace LR1
             {
                 ClientPanel.Visibility = Visibility.Visible;
                 BanksListBox.ItemsSource = App.Database.Banks;
-                var myAccounts = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser).ToList();
-
-                ClientAccountsGrid.ItemsSource = null;
-                ClientAccountsGrid.ItemsSource = myAccounts;
+                RefreshClientAccounts();
             }
         }
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -68,10 +71,6 @@ namespace LR1
             UsersListBox.Items.Refresh();
         }
 
-        private void ManagerGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
 
         private void Approve_Click(object sender, RoutedEventArgs e)
         {
@@ -122,12 +121,43 @@ namespace LR1
 
         private void OpenAccount_Click(object sender, RoutedEventArgs e)
         {
+            var selectedBank = BanksListBox.SelectedItem as Bank;
+            if (selectedBank == null)
+            {
+                MessageBox.Show("Please, select a bank in the BANKS tab first!", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            string number;
+            Random rnd = new Random();
+            do {
+                number = "BY" + rnd.Next(10000, 99999).ToString();
+                if (App.Database.Accounts.FirstOrDefault(x => x.Number == number) == null)
+                {
+                    break;
+                }
+            } while (true);
 
+            var new_account = new BankAccount(number, _current.IdUser, selectedBank.BankId, BankAccountType.Checking);
+            App.Database.Accounts.Add(new_account);
+            App.Database.Save();
+            RefreshClientAccounts();
+            MessageBox.Show($"Account {new_account.Number} successfully opened in {selectedBank.Name}!");
         }
 
         private void Transfer_Click(object sender, RoutedEventArgs e)
         {
+            TransferWindow transferWindow = new TransferWindow(_current);
+            transferWindow.Owner = this;
+            transferWindow.ShowDialog();
+            RefreshClientAccounts();
+        }
 
+        private void DepositeAccount_Click(object sender, RoutedEventArgs e)
+        {
+            DepositeWindow depositeWindow = new DepositeWindow(_current);
+            depositeWindow.Owner = this;
+            depositeWindow.ShowDialog();
+            RefreshClientAccounts();
         }
     }
 }
