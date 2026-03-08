@@ -124,14 +124,35 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Login"
                                         Binding="{Binding Name}"
-                                        Width="*"/>
+                                        FontFamily="Arial"
+                                        FontSize="16"
+                                        Width="*"
+                                        />
                     <DataGridTemplateColumn Header="Actions"
                                             Width="180">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="ApprovedButton" Content="Approve" Background="Green" Click="Approve_Click" Margin="2"/>
-                                    <Button x:Name="RejectedButton" Content="Reject" Background="Red" Click="Reject_Click" Margin="2"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button x:Name="ApprovedButton" 
+                                            Content="Approve" 
+                                            Background="Green" 
+                                            Foreground="White" 
+                                            FontFamily="Arial Black"
+                                            FontSize="16"
+                                            FontWeight="Bold"
+                                            Click="Approve_Click" 
+                                            Margin="10,5" 
+                                            Padding="5"/>
+                                    <Button x:Name="RejectedButton" 
+                                            Content="Reject" 
+                                            Background="Red" 
+                                            Foreground="White" 
+                                            FontFamily="Arial Black"
+                                            FontSize="16"
+                                            FontWeight="Bold"
+                                            Click="Reject_Click" 
+                                            Margin="5" 
+                                            Padding="1"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -163,7 +184,7 @@
                         
                     </ListBox>
                 </TabItem>
-                <TabItem Header="My accounts and deposits">
+                <TabItem Header="My accounts">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -177,13 +198,10 @@
                                                     Binding="{Binding BankName}" 
                                                     Width="100"/>
                                 <DataGridTextColumn Header="Number of an account" 
-                                                    Binding="{Binding BankAccountId}" 
+                                                    Binding="{Binding Number}" 
                                                     Width="*"/>
                                 <DataGridTextColumn Header="Balance" 
                                                     Binding="{Binding Balance}" 
-                                                    Width="80"/>
-                                <DataGridTextColumn Header="Type" 
-                                                    Binding="{Binding Type}" 
                                                     Width="80"/>
                                 <DataGridCheckBoxColumn Header="Blocked" 
                                                         Binding="{Binding IsBlocked}" 
@@ -205,7 +223,68 @@
                                     Margin="5" 
                                     Padding="10,5" 
                                     Click="Transfer_Click"/>
+                            <Button Content="History" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="History_Click"/>
                         </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="My deposits">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <DataGrid x:Name="ClientDepositsGrid" 
+                                  AutoGenerateColumns="False" 
+                                  CanUserAddRows="False">   
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Bank" 
+                                    Binding="{Binding BankName}" 
+                                    Width="100"/>
+                                <DataGridTextColumn Header="Number of a deposit" 
+                                    Binding="{Binding Number}" 
+                                    Width="*"/>
+                                <DataGridTextColumn Header="Balance" 
+                                    Binding="{Binding Balance}" 
+                                    Width="80"/>
+                                <DataGridTextColumn Header="Procent" 
+                                    Binding="{Binding InterestRate}" 
+                                    Width="80"/>
+                                <DataGridTextColumn Header="Term (mo)" 
+                                                    Binding="{Binding TermMonths}" 
+                                                    Width="80"/>
+                                <DataGridTextColumn Header="Finish Date" 
+                                                    Binding="{Binding EndDate, StringFormat=\{0:HH:mm:ss\}}" 
+                                                    Width="100"/>
+                                <DataGridCheckBoxColumn Header="Blocked" 
+                                        Binding="{Binding IsBlocked}" 
+                                        IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel Grid.Row="1" 
+                                    Orientation="Horizontal" 
+                                    HorizontalAlignment="Right">
+                            <Button Content="Open a deposite" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="OpenDeposite_Click"/>
+                            <Button Content="Deposite" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="DepositeDeposite_Click"/>
+                            <Button Content="Transfer" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="TransferDeposit_Click"/>
+                            <Button Content="History" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="HistoryDeposit_Click"/>
+                        </StackPanel>
+
                     </Grid>
                 </TabItem>
             </TabControl>

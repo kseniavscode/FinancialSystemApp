@@ -30,7 +30,9 @@ namespace LR1
         private void RefreshClientAccounts()
         {
             ClientAccountsGrid.ItemsSource = null;
-            ClientAccountsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser).ToList(); ;
+            ClientAccountsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser && a.Type == BankAccountType.Checking).ToList();
+            ClientDepositsGrid.ItemsSource = null;
+            ClientDepositsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser && a.Type == BankAccountType.Deposit).ToList();
         }
         private void SetupInterface()
         {
@@ -158,6 +160,34 @@ namespace LR1
             depositeWindow.Owner = this;
             depositeWindow.ShowDialog();
             RefreshClientAccounts();
+        }
+
+        private void History_Click(object sender, RoutedEventArgs e)
+        {
+            HistoryWindow historyWindow = new HistoryWindow(_current);
+            historyWindow.Owner = this;
+            historyWindow.ShowDialog();
+            RefreshClientAccounts();    
+        }
+
+        private void HistoryDeposit_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void TransferDeposit_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DepositeDeposite_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OpenDeposite_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
