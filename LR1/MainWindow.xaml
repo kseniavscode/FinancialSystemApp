@@ -141,5 +141,70 @@
             </DataGrid>
             
         </GroupBox>
+
+        <GroupBox x:Name="ClientPanel"
+                  Visibility="Collapsed"
+                  Grid.Column="1"
+                  Margin="10"
+                  Header="A Client`s account">
+            <TabControl>
+                <TabItem Header="Banks">
+                    <ListBox x:Name="BanksListBox"
+                             Margin="10">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="5">
+                                    <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding BIC}" Foreground="Gray"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        
+                    </ListBox>
+                </TabItem>
+                <TabItem Header="My accounts and deposits">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <DataGrid x:Name="ClientAccountsGrid" 
+                                  AutoGenerateColumns="False" 
+                                  CanUserAddRows="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Bank" 
+                                                    Binding="{Binding BankName}" 
+                                                    Width="100"/>
+                                <DataGridTextColumn Header="Number of an account" 
+                                                    Binding="{Binding Number}" 
+                                                    Width="*"/>
+                                <DataGridTextColumn Header="Balance" 
+                                                    Binding="{Binding Balance}" 
+                                                    Width="80"/>
+                                <DataGridTextColumn Header="Type" 
+                                                    Binding="{Binding Type}" 
+                                                    Width="80"/>
+                                <DataGridCheckBoxColumn Header="Blocked" 
+                                                        Binding="{Binding IsBlocked}" 
+                                                        IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <StackPanel Grid.Row="1" 
+                                    Orientation="Horizontal" 
+                                    HorizontalAlignment="Right">
+                            <Button Content="Open an account" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="OpenAccount_Click"/>
+                            <Button Content="Transfer" 
+                                    Margin="5" 
+                                    Padding="10,5" 
+                                    Click="Transfer_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+            
+        </GroupBox>
     </Grid>
 </Window>

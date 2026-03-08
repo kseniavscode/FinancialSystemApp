@@ -11,6 +11,10 @@ namespace LR1.Services
     {
         private const string FileName = "data.json";
         public List<User> Users { get; set; } = new List<User>();
+        public List<Bank> Banks { get; set; } = new List<Bank>();
+        public List<BankAccount> Accounts { get; set; } = new List<BankAccount>();
+        public List<Enterprise> Enterprises { get; set; } = new List<Enterprise>();
+        public List<TransactionAction> Transactions { get; set; } = new List<TransactionAction>();
 
         public void Save()
         {
@@ -21,21 +25,34 @@ namespace LR1.Services
         }
         public static DataStorage Load()
         {
+            DataStorage storage;
             if (!File.Exists(FileName))
             {
-                return new DataStorage();
+                storage = new DataStorage();
             }
-
-            try
+            else
             {
-                string json = File.ReadAllText(FileName);
-                return JsonSerializer.Deserialize<DataStorage>(json) ?? new DataStorage();
+                try
+                {
+                    string json = File.ReadAllText(FileName);
+                    storage = JsonSerializer.Deserialize<DataStorage>(json) ?? new DataStorage();
+                }
+                catch
+                {
+                    storage = new DataStorage();
+                }
             }
-            catch
+            if (storage.Banks.Count == 0)
             {
-                return new DataStorage();
-            }
+                storage.Banks.Add(new Bank("Альфа-Банк"));
+                storage.Banks.Add(new Bank("Беларусбанк"));
 
+                storage.Enterprises.Add(new Enterprise("Техно-Старт"));
+                storage.Enterprises.Add(new Enterprise("Глобал АйТи"));
+
+                storage.Save();
+            }
+            return storage;
         }
     }
 }

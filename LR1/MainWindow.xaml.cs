@@ -28,18 +28,29 @@ namespace LR1
         }
         private void SetupInterface()
         {
+            AdminPanel.Visibility = Visibility.Collapsed;
+            ManagerPanel.Visibility = Visibility.Collapsed;
+            ClientPanel.Visibility = Visibility.Collapsed;
+
             if (_current.Role == UserRole.Admin)
             {
                 AdminPanel.Visibility = Visibility.Visible;
-                ManagerPanel.Visibility = Visibility.Hidden;
                 UsersListBox.ItemsSource = App.Database.Users;
                 AdminGrid.ItemsSource = App.Database.Users.Where(x => (x.Status == ApprovalStatus.Approved || x.Status == ApprovalStatus.Rejected) && x.Role != UserRole.Admin && x.Role != UserRole.Manager).ToList();
             }
             if (_current.Role == UserRole.Manager)
             {
-                AdminPanel.Visibility = Visibility.Hidden;
                 ManagerPanel.Visibility = Visibility.Visible;
                 ManagerGrid.ItemsSource = App.Database.Users.Where(x => x.Status == ApprovalStatus.Pending).ToList();
+            }
+            if (_current.Role == UserRole.Client)
+            {
+                ClientPanel.Visibility = Visibility.Visible;
+                BanksListBox.ItemsSource = App.Database.Banks;
+                var myAccounts = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser).ToList();
+
+                ClientAccountsGrid.ItemsSource = null;
+                ClientAccountsGrid.ItemsSource = myAccounts;
             }
         }
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -107,6 +118,16 @@ namespace LR1
                 AdminGrid.ItemsSource = null;
                 AdminGrid.ItemsSource = App.Database.Users.Where(x => (x.Status == ApprovalStatus.Approved || x.Status == ApprovalStatus.Rejected) && x.Role != UserRole.Admin && x.Role != UserRole.Manager).ToList(); ;
             }
+        }
+
+        private void OpenAccount_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Transfer_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

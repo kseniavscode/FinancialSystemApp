@@ -10,4 +10,18 @@ namespace LR1.Models
         Manager,
         Admin
     }
+    public enum BankAccountType
+    {
+        Checking,
+        Deposit
+
+    }
+    public enum TransactionType
+    {
+        Transfer,       
+        AccountOpening, 
+        DepositCreation,
+        SalaryPayment,  
+        Blocking        
+    }
 }
