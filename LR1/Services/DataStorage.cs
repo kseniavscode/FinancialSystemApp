@@ -13,9 +13,10 @@ namespace LR1.Services
         public List<User> Users { get; set; } = new List<User>();
         public List<Bank> Banks { get; set; } = new List<Bank>();
         public List<BankAccount> Accounts { get; set; } = new List<BankAccount>();
+        public List<DepositAccount> Deposits { get; set; } = new List<DepositAccount>();
         public List<Enterprise> Enterprises { get; set; } = new List<Enterprise>();
         public List<TransactionAction> Transactions { get; set; } = new List<TransactionAction>();
-
+        public List<SalaryRequest> SalaryRequests { get; set; } = new List<SalaryRequest>();
         public void Save()
         {
             
@@ -42,13 +43,14 @@ namespace LR1.Services
                     storage = new DataStorage();
                 }
             }
-            if (storage.Banks.Count == 0)
+            if (storage.Enterprises.Count == 0)
             {
                 storage.Banks.Add(new Bank("Альфа-Банк"));
                 storage.Banks.Add(new Bank("Беларусбанк"));
 
-                storage.Enterprises.Add(new Enterprise("Техно-Старт"));
-                storage.Enterprises.Add(new Enterprise("Глобал АйТи"));
+                storage.Enterprises.Add(new Enterprise("Техно-Старт", 1200, 3500));
+                storage.Enterprises.Add(new Enterprise("Глобал АйТи", 2000, 5000));
+                storage.Enterprises.Add(new Enterprise("Местный Завод", 800, 1500));
 
                 storage.Save();
             }

@@ -44,7 +44,7 @@ namespace LR1.Views
                 UserId = current.IdUser,
                 Type = TransactionType.DepositCreation,
                 Amount = sum,
-                SourceAccountId = acc.BankId,
+                TargetAccountId = acc.BankId,
                 Description = $"Deposite money: {sum} to {acc.Number}"
             };
             App.Database.Transactions.Add(transaction);

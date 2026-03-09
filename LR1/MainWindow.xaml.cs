@@ -5,6 +5,7 @@ using System.Text;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -38,14 +39,47 @@ namespace LR1
         }
         private void Timer_Tick(object sender, EventArgs e)
         {
-            ClientDepositsGrid.Items.Refresh();
+            if (ClientDepositsGrid == null || ClientDepositsGrid.ItemsSource == null)
+                return;
+            int selectedIndex = ClientDepositsGrid.SelectedIndex;
+
+            try
+            {
+                ClientDepositsGrid.Items.Refresh();
+                if (selectedIndex >= 0 && selectedIndex < ClientDepositsGrid.Items.Count)
+                {
+                    ClientDepositsGrid.SelectedIndex = selectedIndex;
+                }
+            }
+            catch (Exception) { }
         }
         private void RefreshClientAccounts()
         {
-            ClientAccountsGrid.ItemsSource = null;
-            ClientAccountsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser && a.Type == BankAccountType.Checking).ToList();
-            ClientDepositsGrid.ItemsSource = null;
-            ClientDepositsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser && a.Type == BankAccountType.Deposit).ToList();
+            if (_current.Role == UserRole.Client)
+            {
+                ClientAccountsGrid.ItemsSource = null;
+                ClientAccountsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser && a.Type == BankAccountType.Checking).ToList();
+                ClientDepositsGrid.ItemsSource = null;
+                ClientDepositsGrid.ItemsSource = App.Database.Deposits.Where(d => d.OwnerId == _current.IdUser).ToList();
+            }
+        }
+        private void RefreshManagerData()
+        {
+            if (_current.Role == UserRole.Manager)
+            {
+                PendingUsersGrid.ItemsSource = App.Database.Users.Where(u => u.Status == ApprovalStatus.Pending).ToList();
+                PendingSalaryRequestsGrid.ItemsSource = App.Database.SalaryRequests.Where(r => r.Status == ApprovalStatus.Pending).ToList();
+            }
+        }
+
+        private void RefreshAdminData()
+        {
+            if (_current.Role == UserRole.Admin)
+            {
+                UsersListBox.ItemsSource = App.Database.Users.Where(u => u.IdUser != _current.IdUser).ToList();
+                AdminGrid.ItemsSource = App.Database.Users.Where(x => (x.Status == ApprovalStatus.Approved || x.Status == ApprovalStatus.Rejected) && x.Role == UserRole.Client).ToList();
+                AllTransactionsGrid.ItemsSource = App.Database.Transactions.OrderByDescending(x => x.DateTime).ToList();
+            }
         }
         private void SetupInterface()
         {
@@ -56,20 +90,27 @@ namespace LR1
             if (_current.Role == UserRole.Admin)
             {
                 AdminPanel.Visibility = Visibility.Visible;
-                UsersListBox.ItemsSource = App.Database.Users;
-                AdminGrid.ItemsSource = App.Database.Users.Where(x => (x.Status == ApprovalStatus.Approved || x.Status == ApprovalStatus.Rejected) && x.Role != UserRole.Admin && x.Role != UserRole.Manager).ToList();
+                RefreshAdminData();
+                
             }
             if (_current.Role == UserRole.Manager)
             {
                 ManagerPanel.Visibility = Visibility.Visible;
-                ManagerGrid.ItemsSource = App.Database.Users.Where(x => x.Status == ApprovalStatus.Pending).ToList();
+                RefreshManagerData();
             }
             if (_current.Role == UserRole.Client)
             {
                 ClientPanel.Visibility = Visibility.Visible;
                 BanksListBox.ItemsSource = App.Database.Banks;
+                EnterprisesListBox.ItemsSource = App.Database.Enterprises;
+                UpdateSalaryUI();
                 RefreshClientAccounts();
             }
+        }
+        private void UpdateSalaryUI()
+        {
+            var approvedRequest = App.Database.SalaryRequests.FirstOrDefault(r => r.UserId == _current.IdUser && r.Status == ApprovalStatus.Approved);
+            GetSalaryButton.Visibility = approvedRequest != null ? Visibility.Visible : Visibility.Collapsed;
         }
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
@@ -78,50 +119,64 @@ namespace LR1
             this.Close();
         }
 
-        private void AddManagerButton_Click(object sender, RoutedEventArgs e)
-        {
-            AddManagerWindow addManagerWindow = new AddManagerWindow();
-            addManagerWindow.Owner = this;
-            addManagerWindow.ShowDialog();
-            UsersListBox.Items.Refresh();
-        }
+        
 
 
-        private void Approve_Click(object sender, RoutedEventArgs e)
+
+        private void ApproveUserInline_Click(object sender, RoutedEventArgs e)
         {
             var user = (sender as Button).DataContext as User;
             if (user != null)
             {
                 user.Status = ApprovalStatus.Approved;
                 App.Database.Save();
-                ManagerGrid.ItemsSource = App.Database.Users.Where(x => x.Status == ApprovalStatus.Pending).ToList();
+                RefreshManagerData();
             }
-
         }
 
-        private void Reject_Click(object sender, RoutedEventArgs e)
+        private void RejectUserInline_Click(object sender, RoutedEventArgs e)
         {
             var user = (sender as Button).DataContext as User;
             if (user != null)
             {
                 user.Status = ApprovalStatus.Rejected;
                 App.Database.Save();
-                ManagerGrid.ItemsSource = App.Database.Users.Where(x => x.Status == ApprovalStatus.Pending).ToList();
+                RefreshManagerData();
             }
         }
 
-        private void ShowUsersListButton_Click(object sender, RoutedEventArgs e)
+        private void ApproveSalaryInline_Click(object sender, RoutedEventArgs e)
         {
-            UsersListBox.Visibility = Visibility.Visible;
-            AdminGrid.Visibility = Visibility.Hidden;
+            var salaryRequest = (sender as Button).DataContext as SalaryRequest;
+            if (salaryRequest != null)
+            {
+                salaryRequest.Status = ApprovalStatus.Approved;
+
+                var enterprise = App.Database.Enterprises.FirstOrDefault(x => x.Id == salaryRequest.EnterpriseId);
+                if (enterprise != null && !enterprise.EmployeeIds.Contains(salaryRequest.UserId))
+                {
+                    enterprise.EmployeeIds.Add(salaryRequest.UserId);
+                }
+                App.Database.Save();
+                RefreshManagerData();
+            }
         }
 
-        private void ShowActionsButton_Click(object sender, RoutedEventArgs e)
+        private void RejectSalaryInline_Click(object sender, RoutedEventArgs e)
         {
-            UsersListBox.Visibility = Visibility.Hidden;
-            AdminGrid.Visibility =Visibility.Visible;
+            var salaryRequest = (sender as Button).DataContext as SalaryRequest;
+            if (salaryRequest != null)
+            {
+                salaryRequest.Status = ApprovalStatus.Rejected;
+
+                App.Database.Save();
+                RefreshManagerData();
+            }
         }
 
+
+        
+        
         private void ResetStatus_Click(object sender, RoutedEventArgs e)
         {
             var user = (sender as Button).DataContext as User;
@@ -129,10 +184,25 @@ namespace LR1
             {
                 user.Status = ApprovalStatus.Pending;
                 App.Database.Save();
-                AdminGrid.ItemsSource = null;
-                AdminGrid.ItemsSource = App.Database.Users.Where(x => (x.Status == ApprovalStatus.Approved || x.Status == ApprovalStatus.Rejected) && x.Role != UserRole.Admin && x.Role != UserRole.Manager).ToList(); ;
+                RefreshAdminData();
+                MessageBox.Show($"Status for {user.Name} reset to Pending.");
             }
         }
+        private void AddManagerButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddManagerWindow addManagerWindow = new AddManagerWindow();
+            addManagerWindow.Owner = this;
+            if (addManagerWindow.ShowDialog() == true)
+            {
+                RefreshAdminData();
+            }
+        }
+
+        private void RollbackTransaction_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
 
         private void OpenAccount_Click(object sender, RoutedEventArgs e)
         {
@@ -144,7 +214,8 @@ namespace LR1
             }
             string number;
             Random rnd = new Random();
-            do {
+            do
+            {
                 number = "BY" + rnd.Next(10000, 99999).ToString();
                 if (App.Database.Accounts.FirstOrDefault(x => x.Number == number) == null)
                 {
@@ -180,12 +251,13 @@ namespace LR1
             HistoryWindow historyWindow = new HistoryWindow(_current);
             historyWindow.Owner = this;
             historyWindow.ShowDialog();
-            RefreshClientAccounts();    
+            RefreshClientAccounts();
         }
 
 
         private void TransferDeposit_Click(object sender, RoutedEventArgs e)
         {
+
             var selectedDeposit = ClientDepositsGrid.SelectedItem as DepositAccount;
             if (selectedDeposit == null)
             {
@@ -214,23 +286,37 @@ namespace LR1
                 MessageBox.Show("Main account not found! Cannot transfer funds. Choose another account");
                 ChooseAccountWindow chooseAccountWindow = new ChooseAccountWindow(_current);
                 chooseAccountWindow.Owner = this;
-                chooseAccountWindow.ShowDialog();
-                mainAccount = chooseAccountWindow.ChooseAccountComboBox.SelectedItem as BankAccount;
+                if (chooseAccountWindow.ShowDialog() == true || chooseAccountWindow.ChooseAccountComboBox.SelectedItem != null)
+                {
+                    mainAccount = chooseAccountWindow.ChooseAccountComboBox.SelectedItem as BankAccount;
+                }
+                if (mainAccount == null)
+                {
+                    MessageBox.Show("Transfer cancelled. No target account selected.");
+                    return;
+                }
             }
-            
+
 
             mainAccount.Balance += finalAmount;
-            App.Database.Accounts.Remove(selectedDeposit);
+            App.Database.Deposits.Remove(selectedDeposit);
+            App.Database.Transactions.Add(new TransactionAction
+            {
+                UserId = _current.IdUser,
+                Type = TransactionType.Transfer,
+                SourceAccountId = selectedDeposit.BankAccountId,
+                TargetAccountId = mainAccount.BankAccountId,
+                Amount = finalAmount,
+                Description = $"Close deposit {selectedDeposit.Number}. Profit: {profit:C}"
+            });
+
             App.Database.Save();
 
             RefreshClientAccounts();
             MessageBox.Show($"Deposit closed!\nTransferred to account {mainAccount.Number}: {finalAmount:C}\n(Profit: {profit:C})");
         }
 
-        private void DepositeDeposite_Click(object sender, RoutedEventArgs e)
-        {
 
-        }
 
         private void OpenDeposite_Click(object sender, RoutedEventArgs e)
         {
@@ -239,5 +325,95 @@ namespace LR1
             addDepositWindow.ShowDialog();
             RefreshClientAccounts();
         }
+
+        private void CloseAccount_Click(object sender, RoutedEventArgs e)
+        {
+            var acc = ClientAccountsGrid.SelectedItem as BankAccount;
+            if (acc != null)
+            {
+                MessageBox.Show("Please select an account to close!");
+                return;
+            }
+            if (acc.Balance > 0)
+            {
+                MessageBox.Show("Cannot close account with positive balance! Transfer your money first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            var result = MessageBox.Show($"Are you sure you want to close account {acc.Number}?", "Confirmation", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                App.Database.Accounts.Remove(acc);
+
+                App.Database.Save();
+                RefreshClientAccounts();
+            }
+        }
+
+        private void ApplyForSalary_Click(object sender, RoutedEventArgs e)
+        {
+            var enterprise = EnterprisesListBox.SelectedItem as Enterprise;
+            if (enterprise == null)
+            {
+                MessageBox.Show("Select an enterprise!");
+                return;
+            }
+            if (App.Database.SalaryRequests.Any(r => r.UserId == _current.IdUser && r.EnterpriseId == enterprise.Id))
+            {
+                MessageBox.Show("Application already submitted!");
+                return;
+            }
+            App.Database.SalaryRequests.Add(new SalaryRequest(_current.IdUser, enterprise.Id));
+            App.Database.Save();
+            MessageBox.Show("Application sent to manager!");
+        }
+
+        private void GetSalary_Click(object sender, RoutedEventArgs e)
+        {
+            var approvedRequest = App.Database.SalaryRequests.FirstOrDefault(r => r.UserId == _current.IdUser && r.Status == ApprovalStatus.Approved);
+
+            if (approvedRequest == null)
+            {
+                MessageBox.Show("Application sent to manager! Just wait.");
+                return;
+            }
+            var enterprise = App.Database.Enterprises.FirstOrDefault(ent => ent.Id == approvedRequest.EnterpriseId);
+            if (enterprise == null) return;
+
+
+            ChooseAccountWindow chooseWin = new ChooseAccountWindow(_current);
+            if (chooseWin.ShowDialog() == true)
+            {
+                var targetAcc = chooseWin.ChooseAccountComboBox.SelectedItem as BankAccount;
+                if (targetAcc != null)
+                {
+                    Random rnd = new Random();
+
+                    double randomFactor = rnd.NextDouble();
+                    decimal range = enterprise.MaxSalary - enterprise.MinSalary;
+                    decimal calculatedSalary = enterprise.MinSalary + (range * (decimal)randomFactor);
+                    calculatedSalary = Math.Round(calculatedSalary, 2);
+                    targetAcc.Balance += calculatedSalary;
+
+                    App.Database.Transactions.Add(new TransactionAction
+                    {
+                        UserId = _current.IdUser,
+                        Type = TransactionType.SalaryPayment,
+                        Amount = calculatedSalary,
+                        TargetAccountId = targetAcc.BankAccountId,
+                        Description = $"Salary from {enterprise.Name} to {targetAcc.Number}"
+                    });
+
+                    App.Database.Save();
+                    RefreshClientAccounts();
+
+                    MessageBox.Show($"Congratulations!\nYour salary from '{enterprise.Name}' this month is: {calculatedSalary:C}\nCredited to: {targetAcc.Number}");
+                }
+
+               
+
+            }
+        }
+
+        
     }
 }

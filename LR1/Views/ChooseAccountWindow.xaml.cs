@@ -28,7 +28,15 @@ namespace LR1.Views
 
         private void CloseDepositButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            if (ChooseAccountComboBox.SelectedItem != null)
+            {
+                this.DialogResult = true; 
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Please select an account first!");
+            }
         }
     }
 }

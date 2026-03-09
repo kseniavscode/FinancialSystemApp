@@ -64,20 +64,13 @@ namespace LR1.Views
             {
                 UserId = current_user.IdUser,
                 Type = TransactionType.Transfer,
-                Amount = -sum,
-                SourceAccountId = sourceAcc.BankId, 
-                Description = $"Transfer from {sourceAcc.Number} to {targetAcc.Number}"
-            };
-            App.Database.Transactions.Add(transaction);
-            transaction = new TransactionAction
-            {
-                UserId = targetAcc.OwnerId,
-                Type = TransactionType.Transfer,
                 Amount = sum,
-                SourceAccountId = sourceAcc.BankId,
+                SourceAccountId = sourceAcc.BankId, 
+                TargetAccountId = targetAcc.BankId,
                 Description = $"Transfer from {sourceAcc.Number} to {targetAcc.Number}"
             };
             App.Database.Transactions.Add(transaction);
+            
             App.Database.Save();
             MessageBox.Show("Transfer successful!");
             this.Close();

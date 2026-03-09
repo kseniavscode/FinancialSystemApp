@@ -62,7 +62,7 @@ namespace LR1.Views
             do
             {
                 number = "DEP" + rnd.Next(10000, 99999).ToString();
-                if (App.Database.Accounts.FirstOrDefault(x => x.Number == number) == null)
+                if (App.Database.Deposits.FirstOrDefault(x => x.Number == number) == null)
                 {
                     break;
                 }
@@ -81,7 +81,7 @@ namespace LR1.Views
             };
             App.Database.Transactions.Add(transaction);
 
-            App.Database.Accounts.Add(deposit);
+            App.Database.Deposits.Add(deposit);
             App.Database.Save();
             MessageBox.Show($"Deposit {number} opened successfully!\nAmount: {sum:C}\nTerm: {month} months.");
             this.Close();

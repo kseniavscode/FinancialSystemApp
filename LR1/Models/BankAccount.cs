@@ -6,6 +6,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LR1.Models
 {
+    [JsonDerivedType(typeof(BankAccount), "base")]
+    [JsonDerivedType(typeof(DepositAccount), "deposit")]
     public class BankAccount
     {
         public Guid BankAccountId { get; set; }

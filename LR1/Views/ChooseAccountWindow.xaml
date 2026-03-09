@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LR1.Views"
         mc:Ignorable="d"
         Title="ChooseAccountWindow" Height="350" Width="300" WindowStartupLocation="CenterOwner">
-    <Grid x:Name="OpenDepositGrid">
+    <Grid x:Name="ChooseAccountGrid">
         <StackPanel Margin="20">
             <TextBlock Text="Close a deposit" FontSize="18" Margin="20, 10" FontFamily="Artifakt Element" FontWeight="Bold"/>
             <TextBlock Text="Select source account:" Margin="20,5"/>
