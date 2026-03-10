@@ -62,11 +62,12 @@ namespace LR1.Views
             targetAcc.Balance += sum;
             var transaction = new TransactionAction
             {
-                UserId = current_user.IdUser,
+                UserIdFrom = current_user.IdUser,
+                UserIdTo = targetAcc.OwnerId,
                 Type = TransactionType.Transfer,
                 Amount = sum,
-                SourceAccountId = sourceAcc.BankId, 
-                TargetAccountId = targetAcc.BankId,
+                SourceAccountId = sourceAcc.BankAccountId, 
+                TargetAccountId = targetAcc.BankAccountId,
                 Description = $"Transfer from {sourceAcc.Number} to {targetAcc.Number}"
             };
             App.Database.Transactions.Add(transaction);

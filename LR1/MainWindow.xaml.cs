@@ -200,7 +200,53 @@ namespace LR1
 
         private void RollbackTransaction_Click(object sender, RoutedEventArgs e)
         {
+            var transaction = (sender as Button).DataContext as TransactionAction;
+            if (transaction == null || transaction.IsCancelled) return;
+            var result = MessageBox.Show(
+                $"Are you sure you want to rollback this transaction?\n" +
+                $"Amount: {transaction.Amount:F2}\n" +
+                $"Description: {transaction.Description}",
+                "Confirm Rollback",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes) return;
 
+            var sourceAcc = App.Database.Accounts.FirstOrDefault(a => a.BankAccountId == transaction.SourceAccountId);
+            var targetAcc = App.Database.Accounts.FirstOrDefault(a => a.BankAccountId == transaction.TargetAccountId);
+            try
+            {
+                if (transaction.Type == TransactionType.Transfer || transaction.Type == TransactionType.TransferDeposit)
+                {
+                    if (sourceAcc != null) sourceAcc.Balance += transaction.Amount;
+                    if (targetAcc != null) targetAcc.Balance -= transaction.Amount;
+                }
+                if (transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.SalaryPayment)
+                {
+                    if (targetAcc != null) targetAcc.Balance -= transaction.Amount;
+                }
+                if (transaction.Type == TransactionType.Withdrawal)
+                {
+                    if (sourceAcc != null) sourceAcc.Balance += transaction.Amount;
+                }
+                if (transaction.Type == TransactionType.DepositCreation)
+                {
+                    if (sourceAcc != null) sourceAcc.Balance += transaction.Amount;
+                    if (targetAcc != null) targetAcc.Balance -= transaction.Amount;
+                }
+                
+                transaction.IsCancelled = true;
+                transaction.Description = "[ROLLED BACK] " + transaction.Description;
+                App.Database.Save();
+
+                AllTransactionsGrid.ItemsSource = null;
+                AllTransactionsGrid.ItemsSource = App.Database.Transactions.OrderByDescending(t => t.DateTime).ToList();
+
+                MessageBox.Show("Transaction has been successfully reversed.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error during rollback: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
 
@@ -302,8 +348,8 @@ namespace LR1
             App.Database.Deposits.Remove(selectedDeposit);
             App.Database.Transactions.Add(new TransactionAction
             {
-                UserId = _current.IdUser,
-                Type = TransactionType.Transfer,
+                UserIdTo = _current.IdUser,
+                Type = TransactionType.TransferDeposit,
                 SourceAccountId = selectedDeposit.BankAccountId,
                 TargetAccountId = mainAccount.BankAccountId,
                 Amount = finalAmount,
@@ -329,7 +375,7 @@ namespace LR1
         private void CloseAccount_Click(object sender, RoutedEventArgs e)
         {
             var acc = ClientAccountsGrid.SelectedItem as BankAccount;
-            if (acc != null)
+            if (acc == null)
             {
                 MessageBox.Show("Please select an account to close!");
                 return;
@@ -396,7 +442,7 @@ namespace LR1
 
                     App.Database.Transactions.Add(new TransactionAction
                     {
-                        UserId = _current.IdUser,
+                        UserIdTo = _current.IdUser,
                         Type = TransactionType.SalaryPayment,
                         Amount = calculatedSalary,
                         TargetAccountId = targetAcc.BankAccountId,

@@ -73,10 +73,11 @@ namespace LR1.Views
             deposit.Balance = sum;
             var transaction = new TransactionAction
             {
-                UserId = current.IdUser,
+                UserIdFrom = current.IdUser,
                 Type = TransactionType.DepositCreation,
-                Amount = -sum,
-                SourceAccountId = acc.BankId,
+                Amount = sum,
+                SourceAccountId = acc.BankAccountId,
+                TargetAccountId = deposit.BankAccountId,
                 Description = $"Deposite money: {sum} to {deposit.Number} by {procent}%"
             };
             App.Database.Transactions.Add(transaction);

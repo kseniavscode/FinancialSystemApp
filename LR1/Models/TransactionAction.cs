@@ -8,7 +8,8 @@ namespace LR1.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime DateTime { get; set; } = DateTime.Now;
-        public Guid UserId { get; set; }
+        public Guid UserIdFrom { get; set; }
+        public Guid UserIdTo { get; set; }
         public TransactionType Type { get; set; }
 
         public string Description { get; set; }

@@ -22,7 +22,7 @@ namespace LR1.Views
         {
             InitializeComponent();
             current = user;
-            HistoryDataGrid.ItemsSource = App.Database.Transactions.Where(x => x.UserId == current.IdUser).Reverse().ToList();
+            HistoryDataGrid.ItemsSource = App.Database.Transactions.Where(x => x.UserIdTo == current.IdUser || x.UserIdFrom == current.IdUser).Reverse().ToList();
         }
     }
 }

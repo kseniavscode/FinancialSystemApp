@@ -18,8 +18,12 @@ namespace LR1.Models
     }
     public enum TransactionType
     {
-        Transfer,       
-        AccountOpening, 
+        Transfer,
+        Withdrawal,
+        Deposit,
+        AccountOpening,
+        AccountClosing,
+        TransferDeposit,
         DepositCreation,
         SalaryPayment,  
         Blocking        
