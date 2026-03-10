@@ -58,17 +58,21 @@ namespace LR1
             if (_current.Role == UserRole.Client)
             {
                 ClientAccountsGrid.ItemsSource = null;
-                ClientAccountsGrid.ItemsSource = App.Database.Accounts.Where(a => a.OwnerId == _current.IdUser && a.Type == BankAccountType.Checking).ToList();
+                ClientAccountsGrid.ItemsSource = App.Database.Accounts.Where(x => x.OwnerId == _current.IdUser && x.Type == BankAccountType.Checking).ToList();
                 ClientDepositsGrid.ItemsSource = null;
-                ClientDepositsGrid.ItemsSource = App.Database.Deposits.Where(d => d.OwnerId == _current.IdUser).ToList();
+                ClientDepositsGrid.ItemsSource = App.Database.Deposits.Where(x => x.OwnerId == _current.IdUser).ToList();
             }
         }
         private void RefreshManagerData()
         {
             if (_current.Role == UserRole.Manager)
             {
-                PendingUsersGrid.ItemsSource = App.Database.Users.Where(u => u.Status == ApprovalStatus.Pending).ToList();
-                PendingSalaryRequestsGrid.ItemsSource = App.Database.SalaryRequests.Where(r => r.Status == ApprovalStatus.Pending).ToList();
+                PendingUsersGrid.ItemsSource = App.Database.Users.Where(x => x.Status == ApprovalStatus.Pending).ToList();
+                PendingSalaryRequestsGrid.ItemsSource = App.Database.SalaryRequests.Where(x => x.Status == ApprovalStatus.Pending).ToList();
+                ManagerEnterprisesListBox.ItemsSource = App.Database.Enterprises.ToList();
+                ManagerAllAccountsGrid.ItemsSource = App.Database.Accounts.Where(x => x.Type == BankAccountType.Checking).ToList();
+                ManagerAllDepositsGrid.ItemsSource = App.Database.Deposits.ToList();
+                ManagerHistoryGrid.ItemsSource = App.Database.Transactions.OrderByDescending(x => x.DateTime).ToList();
             }
         }
 
@@ -76,7 +80,7 @@ namespace LR1
         {
             if (_current.Role == UserRole.Admin)
             {
-                UsersListBox.ItemsSource = App.Database.Users.Where(u => u.IdUser != _current.IdUser).ToList();
+                UsersListBox.ItemsSource = App.Database.Users.Where(x => x.IdUser != _current.IdUser).ToList();
                 AdminGrid.ItemsSource = App.Database.Users.Where(x => (x.Status == ApprovalStatus.Approved || x.Status == ApprovalStatus.Rejected) && x.Role == UserRole.Client).ToList();
                 AllTransactionsGrid.ItemsSource = App.Database.Transactions.OrderByDescending(x => x.DateTime).ToList();
             }
@@ -109,7 +113,7 @@ namespace LR1
         }
         private void UpdateSalaryUI()
         {
-            var approvedRequest = App.Database.SalaryRequests.FirstOrDefault(r => r.UserId == _current.IdUser && r.Status == ApprovalStatus.Approved);
+            var approvedRequest = App.Database.SalaryRequests.FirstOrDefault(x => x.UserId == _current.IdUser && x.Status == ApprovalStatus.Approved);
             GetSalaryButton.Visibility = approvedRequest != null ? Visibility.Visible : Visibility.Collapsed;
         }
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -173,10 +177,93 @@ namespace LR1
                 RefreshManagerData();
             }
         }
+        private void AddEmployeeToEnterprise_Click(object sender, RoutedEventArgs e)
+        {
+            var enterprise = ManagerEnterprisesListBox.SelectedItem as Enterprise;
+            if (enterprise == null)
+            {
+                MessageBox.Show("Select enterprise first!"); 
+                return;
+            }
+            ChooseUserWindow chooseUserWindow = new ChooseUserWindow();
+            chooseUserWindow.Owner = this;
+
+            if (chooseUserWindow.ShowDialog() == true)
+            {
+                var userToAdd = chooseUserWindow.SelectedUser;
+                if (userToAdd != null)
+                {
+
+                    if (!enterprise.EmployeeIds.Contains(userToAdd.IdUser))
+                    {
+
+                        enterprise.EmployeeIds.Add(userToAdd.IdUser);
+                        App.Database.Save();
+                        ManagerEnterprisesListBox_SelectionChanged(null, null);
+                        MessageBox.Show($"{userToAdd.Name} added to {enterprise.Name}");
+                    }
+                    else
+                    {
+                        MessageBox.Show($"{userToAdd.Name} is already an employee in {enterprise.Name}");
+                    }
+                }
+            }
 
 
+            
+        }
+
+        private void RemoveEmployee_Click(object sender, RoutedEventArgs e)
+        {
+            var removed = (sender as Button).DataContext as User;
+            var enterprise = ManagerEnterprisesListBox.SelectedItem as Enterprise;
+            if (removed != null && enterprise != null)
+            {
+                enterprise.EmployeeIds.Remove(removed.IdUser);
+                App.Database.Save();
+                ManagerEnterprisesListBox_SelectionChanged(null, null);
+            }
+        }
+
+
+        private void ToggleBlockAccount_Click(object sender, RoutedEventArgs e)
+        {
+            var blocked = (sender as Button).DataContext as BankAccount;
+            if (blocked != null)
+            {
+                blocked.IsBlocked = !blocked.IsBlocked;
+                App.Database.Save();
+                ManagerAllAccountsGrid.Items.Refresh();
+
+            }
+        }
+        private void ToggleBlockDeposit_Click(object sender, RoutedEventArgs e)
+        {
+            var blocked = (sender as Button).DataContext as DepositAccount;
+            if (blocked != null)
+            {
+                blocked.IsBlocked = !blocked.IsBlocked;
+                App.Database.Save();
+                ManagerAllAccountsGrid.Items.Refresh();
+
+            }
+        }
         
-        
+        private void ManagerEnterprisesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var enterprise = ManagerEnterprisesListBox.SelectedItem as Enterprise;
+            if (enterprise != null)
+            {
+                EnterpriseEmployeesGrid.ItemsSource = App.Database.Users.Where(x => enterprise.EmployeeIds.Contains(x.IdUser)).ToList();
+            }
+        }
+
+
+
+
+
+
+
         private void ResetStatus_Click(object sender, RoutedEventArgs e)
         {
             var user = (sender as Button).DataContext as User;

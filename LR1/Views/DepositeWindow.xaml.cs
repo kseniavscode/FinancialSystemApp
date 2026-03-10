@@ -38,6 +38,11 @@ namespace LR1.Views
                 MessageBox.Show("Sum must be positive!", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Error);
                 return;
             }
+            if (acc.IsBlocked)
+            {
+                MessageBox.Show("This account is BLOCKED by manager.");
+                return;
+            }
             acc.Balance += sum;
             var transaction = new TransactionAction
             {

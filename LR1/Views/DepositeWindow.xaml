@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LR1.Views"
         mc:Ignorable="d"
-        Title="DepositeWindow" Height="300" Width="400" WindowStartupLocation="CenterOwner">
+        Title="DepositeWindow" Height="300" Width="400" WindowStartupLocation="CenterScreen">
     <Grid>
         <StackPanel Margin="20">
             <TextBlock Text="==== DEPOSITE" FontSize="18" Margin="20, 10" FontFamily="Artifakt Element" FontWeight="Bold"/>

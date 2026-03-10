@@ -162,22 +162,36 @@
                   Visibility="Collapsed">
             <Grid>
                 <TabControl>
-                    <!-- Вкладка подтверждения пользователей -->
                     <TabItem Header="Pending Users">
                         <DataGrid x:Name="PendingUsersGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="5" CanUserAddRows="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                                <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="*"/>
+                                <DataGridTextColumn Header="Name" 
+                                                    Binding="{Binding Name}" 
+                                                    Width="*"/>
+                                <DataGridTextColumn Header="Role" 
+                                                    Binding="{Binding Role}" 
+                                                    Width="*"/>
 
-                                <!-- Колонка с кнопками для пользователей -->
-                                <DataGridTemplateColumn Header="Actions" Width="150">
+                                <DataGridTemplateColumn Header="Actions" 
+                                                        Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Button Content="✓" Foreground="Green" FontWeight="Bold" Width="30" Margin="2" 
-                                            Click="ApproveUserInline_Click" ToolTip="Approve"/>
-                                                <Button Content="✗" Foreground="Red" FontWeight="Bold" Width="30" Margin="2" 
-                                            Click="RejectUserInline_Click" ToolTip="Reject"/>
+                                            <StackPanel Orientation="Horizontal" 
+                                                        HorizontalAlignment="Center">
+                                                <Button Content="✓" 
+                                                        Foreground="Green" 
+                                                        FontWeight="Bold" 
+                                                        Width="30" 
+                                                        Margin="2" 
+                                                        Click="ApproveUserInline_Click" 
+                                                        ToolTip="Approve"/>
+                                                <Button Content="✗" 
+                                                        Foreground="Red" 
+                                                        FontWeight="Bold" 
+                                                        Width="30" 
+                                                        Margin="2" 
+                                                        Click="RejectUserInline_Click" 
+                                                        ToolTip="Reject"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -185,27 +199,164 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </TabItem>
-
-                    <!-- Вкладка подтверждения зарплатных проектов -->
+                    
                     <TabItem Header="Salary Requests">
-                        <DataGrid x:Name="PendingSalaryRequestsGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="5" CanUserAddRows="False">
+                        <DataGrid x:Name="PendingSalaryRequestsGrid" 
+                                  AutoGenerateColumns="False" 
+                                  IsReadOnly="True" 
+                                  Margin="5" 
+                                  CanUserAddRows="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="User ID" Binding="{Binding UserId}" Width="*"/>
-                                <DataGridTextColumn Header="Enterprise ID" Binding="{Binding EnterpriseId}" Width="*"/>
+                                <DataGridTextColumn Header="User" 
+                                                    Binding="{Binding Name}" 
+                                                    Width="*"/>
+                                <DataGridTextColumn Header="Enterprise" 
+                                                    Binding="{Binding Name}" 
+                                                    Width="*"/>
 
-                                <!-- Колонка с кнопками для зарплатных проектов -->
-                                <DataGridTemplateColumn Header="Actions" Width="150">
+      
+                                <DataGridTemplateColumn Header="Actions" 
+                                                        Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Button Content="✓" Foreground="Green" FontWeight="Bold" Width="30" Margin="2" 
-                                            Click="ApproveSalaryInline_Click" ToolTip="Approve"/>
-                                                <Button Content="✗" Foreground="Red" FontWeight="Bold" Width="30" Margin="2" 
-                                            Click="RejectSalaryInline_Click" ToolTip="Reject"/>
+                                            <StackPanel Orientation="Horizontal" 
+                                                        HorizontalAlignment="Center">
+                                                <Button Content="✓" 
+                                                        Foreground="Green" 
+                                                        FontWeight="Bold" 
+                                                        Width="30" 
+                                                        Margin="2" 
+                                                        Click="ApproveSalaryInline_Click" 
+                                                        ToolTip="Approve"/>
+                                                <Button Content="✗" 
+                                                        Foreground="Red" 
+                                                        FontWeight="Bold" 
+                                                        Width="30" 
+                                                        Margin="2" 
+                                                        Click="RejectSalaryInline_Click" 
+                                                        ToolTip="Reject"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                    
+                    <TabItem Header="Enterprises &amp; Staff">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ListBox x:Name="ManagerEnterprisesListBox" 
+                                     Margin="5" 
+                                     SelectionChanged="ManagerEnterprisesListBox_SelectionChanged"
+                                     DisplayMemberPath="Name"/>
+                            <StackPanel Grid.Column="1" 
+                                        Margin="5">
+                                <TextBlock Text="Employees of selected enterprise:" 
+                                           FontWeight="Bold" 
+                                           Margin="0,0,0,5"/>
+                                <DataGrid x:Name="EnterpriseEmployeesGrid" 
+                                          AutoGenerateColumns="False" 
+                                          IsReadOnly="True" 
+                                          Height="200" 
+                                          CanUserAddRows="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Name" 
+                                                            Binding="{Binding Name}" 
+                                                            Width="*"/>
+                                        <DataGridTemplateColumn Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="Remove" 
+                                                            Click="RemoveEmployee_Click" 
+                                                            Background="#FFECEC"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Button Content="Add Employee (Select from List)" 
+                                        Margin="0,10,0,0" 
+                                        Click="AddEmployeeToEnterprise_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+                    <!-- 4. НОВОЕ: Блокировка счетов -->
+                    <TabItem Header="Accounts Control">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <GroupBox Header="Checking Accounts" Grid.Row="0">
+                                <DataGrid x:Name="ManagerAllAccountsGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="User" 
+                                                            Binding="{Binding OwnerId}" 
+                                                            Width="50"/>
+                                        <DataGridTextColumn Header="Number" 
+                                                            Binding="{Binding Number}" 
+                                                            Width="*"/>
+                                        <DataGridCheckBoxColumn Header="Blocked" 
+                                                                Binding="{Binding IsBlocked}"/>
+                                        <DataGridTemplateColumn Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="Toggle Block" 
+                                                            Click="ToggleBlockAccount_Click"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </GroupBox>
+                            <GroupBox Header="Deposits" 
+                                      Grid.Row="1">
+                                <DataGrid x:Name="ManagerAllDepositsGrid" 
+                                          AutoGenerateColumns="False" 
+                                          IsReadOnly="True" 
+                                          CanUserAddRows="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="User" 
+                                                            Binding="{Binding OwnerId}" 
+                                                            Width="50"/>
+                                        <DataGridTextColumn Header="Number" 
+                                                            Binding="{Binding Number}" 
+                                                            Width="*"/>
+                                        <DataGridCheckBoxColumn Header="Blocked" 
+                                                                Binding="{Binding IsBlocked}"/>
+                                        <DataGridTemplateColumn Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="Toggle Block" 
+                                                            Click="ToggleBlockDeposit_Click"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </GroupBox>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Transaction History">
+                        <DataGrid x:Name="ManagerHistoryGrid" 
+                                  AutoGenerateColumns="False" 
+                                  IsReadOnly="True" 
+                                  Margin="5">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" 
+                                                    Binding="{Binding DateTime}" 
+                                                    Width="120"/>
+                                <DataGridTextColumn Header="Sum" 
+                                                    Binding="{Binding Amount}" 
+                                                    Width="80"/>
+                                <DataGridTextColumn Header="Info" 
+                                                    Binding="{Binding Description}" 
+                                                    Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </TabItem>

@@ -29,25 +29,32 @@ namespace LR1.Views
         {
             var sourceAcc = FromAccountComboBox.SelectedItem as BankAccount;
             string targetNumber = ToAccountNumberTextBox.Text;
+            var targetAcc = App.Database.Accounts.FirstOrDefault(x => x.Number == targetNumber);
+
 
             if (sourceAcc == null || string.IsNullOrWhiteSpace(targetNumber) || !decimal.TryParse(SumTransferTextBox.Text, out decimal sum))
             {
                 MessageBox.Show("Full all fields correctly!", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Error);
                 return;
             }
-
+            if (targetAcc == null)
+            {
+                MessageBox.Show("Enter the correct number for an account!", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+                return;
+            }
+            if (sourceAcc.IsBlocked || targetAcc.IsBlocked)
+            {
+                MessageBox.Show("This account is BLOCKED by manager. Transactions are impossible.");
+                return;
+            }
             if (sum < 0)
             {
                 MessageBox.Show("Sum must be positive!", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Error);
                 return;
             }
 
-            var targetAcc = App.Database.Accounts.FirstOrDefault(x => x.Number == targetNumber);
-            if (targetAcc == null)
-            {
-                MessageBox.Show("Enter the correct number for an account!", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Error);
-                return;
-            }
+            
+            
             if (sourceAcc.Number == targetAcc.Number)
             {
                 MessageBox.Show("You cannot transfer money to the same account!");
