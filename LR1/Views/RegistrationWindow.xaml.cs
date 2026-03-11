@@ -34,6 +34,16 @@ namespace LR1.Views
                 MessageBox.Show("Enter all the information");
                 return;
             }
+            if (password.Contains(" ") || password.Length < 4)
+            {
+                MessageBox.Show("Enter normal password without spaces and more then 4 symbols");
+                return;
+            }
+            if (!login.All(char.IsLetter) || login.Length < 4)
+            {
+                MessageBox.Show("Enter normal name contains only from letters, more then 4 symbols");
+                return;
+            }
             bool userExists = App.Database.Users.Any(u => u.Name == login);
             if (userExists)
             {

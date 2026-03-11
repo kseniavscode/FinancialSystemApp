@@ -14,21 +14,22 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+        <StackPanel Grid.Column="0" Margin="0,80,10,0">
             <TextBlock x:Name="WelcomeTextBlock" 
                        FontSize="16" 
                        FontWeight="Bold" 
                        TextWrapping="Wrap" 
-                       Margin="0,0,0,20"/>
-            <Button Content="Exit"
+                       Margin="0,0,0,20"
+                       HorizontalAlignment="Center"/>
+            <Button Content="EXIT"
                     Padding="5"
                     Click="LogoutButton_Click"
                     Margin="30,10"
                     Background="#0078D7" 
                     Foreground="White" 
-                    FontFamily="Gabriola"
-                    FontSize="16"
-                    FontWeight="DemiBold"/>
+                    FontFamily="Arial Black"
+                    FontSize="20"
+                    FontWeight="Bold"/>
         </StackPanel>
         <GroupBox x:Name="AdminPanel" 
           Grid.Column="1" 
@@ -41,28 +42,36 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- ОДИН общий TabControl для всех трех вкладок -->
                 <TabControl Grid.Row="0" Background="White" BorderBrush="#0078D7">
 
-                    <!-- Вкладка 1: Просмотр -->
                     <TabItem Header="Users Overview">
                         <ListBox x:Name="UsersListBox" Margin="5">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="#EEE" BorderThickness="0,0,0,1" Padding="5">
+                                    <Border BorderBrush="#EEE" 
+                                            BorderThickness="0,0,0,1" 
+                                            Padding="5">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Width="120"/>
-                                            <TextBlock Text="{Binding Role}" Width="100" Foreground="Gray"/>
+                                            <TextBlock Text="{Binding Name}" 
+                                                       FontWeight="Bold" Width="120"/>
+                                            <TextBlock Text="{Binding Role}" 
+                                                       Width="100" 
+                                                       Foreground="Gray"/>
                                             <TextBlock Text="Status: "/>
-                                            <TextBlock Text="{Binding Status}" FontWeight="SemiBold">
+                                            <TextBlock Text="{Binding Status}" 
+                                                       FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Approved">
-                                                                <Setter Property="Foreground" Value="Green"/>
+                                                            <DataTrigger Binding="{Binding Status}" 
+                                                                         Value="Approved">
+                                                                <Setter Property="Foreground" 
+                                                                        Value="Green"/>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Rejected">
-                                                                <Setter Property="Foreground" Value="Red"/>
+                                                            <DataTrigger Binding="{Binding Status}" 
+                                                                         Value="Rejected">
+                                                                <Setter Property="Foreground" 
+                                                                        Value="Red"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -75,7 +84,6 @@
                         </ListBox>
                     </TabItem>
 
-                    <!-- Вкладка 2: Управление статусами -->
                     <TabItem Header="Status Actions">
                         <DataGrid x:Name="AdminGrid" 
                           AutoGenerateColumns="False" 
@@ -83,9 +91,14 @@
                           IsReadOnly="True"
                           Margin="5">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="User Name" Binding="{Binding Name}" Width="*"/>
-                                <DataGridTextColumn Header="Current Status" Binding="{Binding Status}" Width="120"/>
-                                <DataGridTemplateColumn Header="Action" Width="150">
+                                <DataGridTextColumn Header="User Name" 
+                                                    Binding="{Binding Name}" 
+                                                    Width="*"/>
+                                <DataGridTextColumn Header="Current Status" 
+                                                    Binding="{Binding Status}" 
+                                                    Width="120"/>
+                                <DataGridTemplateColumn Header="Action" 
+                                                        Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Button Content="Reset to Pending" 
@@ -99,7 +112,9 @@
                         </DataGrid>
                     </TabItem>
 
-                    <!-- Вкладка 3: Транзакции -->
+                    
+
+
                     <TabItem Header="System Transactions">
                         <DataGrid x:Name="AllTransactionsGrid" 
                           AutoGenerateColumns="False" 
@@ -113,18 +128,18 @@
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid>
-                                                <!-- Кнопка без конвертера -->
+
                                                 <Button x:Name="RollbackBtn" 
-                                                Content="Rollback" 
-                                                Click="RollbackTransaction_Click"
-                                                Background="LightSalmon"
-                                                Padding="5,2"/>
+                                                        Content="Rollback" 
+                                                        Click="RollbackTransaction_Click"
+                                                        Background="LightSalmon"
+                                                        Padding="5,2"/> 
                                                 <TextBlock x:Name="CancelledTxt" 
-                                                   Text="CANCELLED" 
-                                                   Foreground="Red" 
-                                                   FontWeight="Bold" 
-                                                   HorizontalAlignment="Center" 
-                                                   Visibility="Collapsed"/>
+                                                           Text="CANCELLED" 
+                                                           Foreground="Red" 
+                                                           FontWeight="Bold" 
+                                                           HorizontalAlignment="Center" 
+                                                           Visibility="Collapsed"/>
                                             </Grid>
                                             <DataTemplate.Triggers>
                                                 <DataTrigger Binding="{Binding IsCancelled}" Value="True">
@@ -140,16 +155,15 @@
                     </TabItem>
                 </TabControl>
 
-                <!-- Кнопка добавления менеджера вынесена в нижний ряд сетки -->
-                <Button Content="Add New Manager" 
+                <Button Content="ADD NEW MANAGER" 
                 Grid.Row="1" 
                 Padding="10,5" 
                 HorizontalAlignment="Right" 
                 Margin="10"
                 Background="#0078D7" 
                 Foreground="White" 
-                FontFamily="Gabriola"
-                FontSize="18"
+                FontFamily="Arial Black"
+                FontSize="20"
                 Click="AddManagerButton_Click"/>
             </Grid>
         </GroupBox>

@@ -32,5 +32,7 @@ namespace LR1.Models
         public string BankName => App.Database.Banks.FirstOrDefault(b => b.BankId == BankId)?.Name ?? "Unknown";
         [JsonIgnore]
         public string DisplayInfo => $"{Number} (Balance: {Balance:C})";
+        [JsonIgnore]
+        public string NameOwner => App.Database.Users.FirstOrDefault(b => b.IdUser == OwnerId)?.Name ?? "Unknown";
     }
 }

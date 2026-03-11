@@ -28,7 +28,7 @@ namespace LR1
         {
             InitializeComponent();
             _current = user;
-            WelcomeTextBlock.Text = $"Welcome, {_current.Name}! Your role is {_current.Role}.";
+            WelcomeTextBlock.Text = $"Welcome, {_current.Name}!\nYour role is {_current.Role}.";
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
             _timer.Tick += Timer_Tick;
@@ -317,8 +317,14 @@ namespace LR1
                 }
                 if (transaction.Type == TransactionType.DepositCreation)
                 {
+                    targetAcc = App.Database.Deposits.FirstOrDefault(a => a.BankAccountId == transaction.TargetAccountId);
                     if (sourceAcc != null) sourceAcc.Balance += transaction.Amount;
-                    if (targetAcc != null) targetAcc.Balance -= transaction.Amount;
+                    if (targetAcc != null)
+                    {
+                        targetAcc.Balance -= transaction.Amount;
+                        App.Database.Deposits.Remove((DepositAccount)targetAcc);
+                    }
+
                 }
                 
                 transaction.IsCancelled = true;

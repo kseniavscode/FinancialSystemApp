@@ -13,7 +13,6 @@ namespace LR1.Models
         public string Password { get; set; }
         public ApprovalStatus Status { get; set; } = ApprovalStatus.Pending;
         public UserRole Role { get; set; }
-
         public User() { }
         public User(string name, string password, UserRole role)
         {
