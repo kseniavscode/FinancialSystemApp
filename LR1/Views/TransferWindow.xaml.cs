@@ -31,7 +31,6 @@ namespace LR1.Views
             string targetNumber = ToAccountNumberTextBox.Text;
             var targetAcc = App.Database.Accounts.FirstOrDefault(x => x.Number == targetNumber);
 
-
             if (sourceAcc == null || string.IsNullOrWhiteSpace(targetNumber) || !decimal.TryParse(SumTransferTextBox.Text, out decimal sum))
             {
                 MessageBox.Show("Full all fields correctly!", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Error);
@@ -53,8 +52,8 @@ namespace LR1.Views
                 return;
             }
 
-            
-            
+
+
             if (sourceAcc.Number == targetAcc.Number)
             {
                 MessageBox.Show("You cannot transfer money to the same account!");
@@ -73,13 +72,14 @@ namespace LR1.Views
                 UserIdTo = targetAcc.OwnerId,
                 Type = TransactionType.Transfer,
                 Amount = sum,
-                SourceAccountId = sourceAcc.BankAccountId, 
+                SourceAccountId = sourceAcc.BankAccountId,
                 TargetAccountId = targetAcc.BankAccountId,
                 Description = $"Transfer from {sourceAcc.Number} to {targetAcc.Number}"
             };
             App.Database.Transactions.Add(transaction);
-            
+
             App.Database.Save();
+
             MessageBox.Show("Transfer successful!");
             this.Close();
         }

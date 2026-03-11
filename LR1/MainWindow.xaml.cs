@@ -1,4 +1,6 @@
-﻿using LR1.Models;
+﻿using LR1.Interfaces;
+using LR1.Models;
+using LR1.Services;
 using LR1.Views;
 using System.Security.Cryptography;
 using System.Text;
@@ -24,6 +26,10 @@ namespace LR1
     {
         private User _current;
         private DispatcherTimer _timer;
+
+        private IAdminService adminService = new AdminService();
+        private IManagerService managerService = new ManagerService();
+        private IClientService clientService = new ClientService();
         public MainWindow(User user)
         {
             InitializeComponent();
@@ -132,8 +138,7 @@ namespace LR1
             var user = (sender as Button).DataContext as User;
             if (user != null)
             {
-                user.Status = ApprovalStatus.Approved;
-                App.Database.Save();
+                managerService.ApproveUser(user);
                 RefreshManagerData();
             }
         }
@@ -143,8 +148,7 @@ namespace LR1
             var user = (sender as Button).DataContext as User;
             if (user != null)
             {
-                user.Status = ApprovalStatus.Rejected;
-                App.Database.Save();
+                managerService.RejectUser(user);
                 RefreshManagerData();
             }
         }
@@ -154,14 +158,7 @@ namespace LR1
             var salaryRequest = (sender as Button).DataContext as SalaryRequest;
             if (salaryRequest != null)
             {
-                salaryRequest.Status = ApprovalStatus.Approved;
-
-                var enterprise = App.Database.Enterprises.FirstOrDefault(x => x.Id == salaryRequest.EnterpriseId);
-                if (enterprise != null && !enterprise.EmployeeIds.Contains(salaryRequest.UserId))
-                {
-                    enterprise.EmployeeIds.Add(salaryRequest.UserId);
-                }
-                App.Database.Save();
+                managerService.ApproveSalaryInline(salaryRequest);
                 RefreshManagerData();
             }
         }
@@ -298,39 +295,10 @@ namespace LR1
                 MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
 
-            var sourceAcc = App.Database.Accounts.FirstOrDefault(a => a.BankAccountId == transaction.SourceAccountId);
-            var targetAcc = App.Database.Accounts.FirstOrDefault(a => a.BankAccountId == transaction.TargetAccountId);
+            
             try
             {
-                if (transaction.Type == TransactionType.Transfer || transaction.Type == TransactionType.TransferDeposit)
-                {
-                    if (sourceAcc != null) sourceAcc.Balance += transaction.Amount;
-                    if (targetAcc != null) targetAcc.Balance -= transaction.Amount;
-                }
-                if (transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.SalaryPayment)
-                {
-                    if (targetAcc != null) targetAcc.Balance -= transaction.Amount;
-                }
-                if (transaction.Type == TransactionType.Withdrawal)
-                {
-                    if (sourceAcc != null) sourceAcc.Balance += transaction.Amount;
-                }
-                if (transaction.Type == TransactionType.DepositCreation)
-                {
-                    targetAcc = App.Database.Deposits.FirstOrDefault(a => a.BankAccountId == transaction.TargetAccountId);
-                    if (sourceAcc != null) sourceAcc.Balance += transaction.Amount;
-                    if (targetAcc != null)
-                    {
-                        targetAcc.Balance -= transaction.Amount;
-                        App.Database.Deposits.Remove((DepositAccount)targetAcc);
-                    }
-
-                }
-                
-                transaction.IsCancelled = true;
-                transaction.Description = "[ROLLED BACK] " + transaction.Description;
-                App.Database.Save();
-
+                adminService.RollbackTransaction(transaction);
                 AllTransactionsGrid.ItemsSource = null;
                 AllTransactionsGrid.ItemsSource = App.Database.Transactions.OrderByDescending(t => t.DateTime).ToList();
 
@@ -365,6 +333,7 @@ namespace LR1
             var new_account = new BankAccount(number, _current.IdUser, selectedBank.BankId, BankAccountType.Checking);
             App.Database.Accounts.Add(new_account);
             App.Database.Save();
+
             RefreshClientAccounts();
             MessageBox.Show($"Account {new_account.Number} successfully opened in {selectedBank.Name}!");
         }
@@ -468,24 +437,9 @@ namespace LR1
         private void CloseAccount_Click(object sender, RoutedEventArgs e)
         {
             var acc = ClientAccountsGrid.SelectedItem as BankAccount;
-            if (acc == null)
-            {
-                MessageBox.Show("Please select an account to close!");
-                return;
-            }
-            if (acc.Balance > 0)
-            {
-                MessageBox.Show("Cannot close account with positive balance! Transfer your money first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            var result = MessageBox.Show($"Are you sure you want to close account {acc.Number}?", "Confirmation", MessageBoxButton.YesNo);
-            if (result == MessageBoxResult.Yes)
-            {
-                App.Database.Accounts.Remove(acc);
-
-                App.Database.Save();
-                RefreshClientAccounts();
-            }
+            clientService.CloseAccount(acc);
+            RefreshClientAccounts();
+            
         }
 
         private void ApplyForSalary_Click(object sender, RoutedEventArgs e)
